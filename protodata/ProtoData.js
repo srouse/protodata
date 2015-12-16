@@ -13,17 +13,21 @@ var ProtoData = function () {
 
 ProtoData.prototype.generateData = function ( config , arguments ) {
     this.config = config;
-    this.data = {};
-    var obj,config_obj;
+    this.data = {"_root":{}};
+
+    var obj,config_obj,_root=[];
     for ( var obj_name in config ) {
         config_obj = config[obj_name];
 
         if ( config_obj.root === true ) {
             obj = this.generateObject( obj_name );
+            _root.push( obj );
         }
     }
 
+    this.data._root = _root;
     this.serializeData();
+
     return this.data;
 }
 
@@ -54,6 +58,7 @@ ProtoData.prototype.generateObject = function ( type , parent , parent_prop_val 
     }
     var config_obj = this.config[ type ];
     var obj = {};
+
     this.last_id++;
     obj.guid = type + "_" + this.last_id;
 
@@ -65,7 +70,7 @@ ProtoData.prototype.generateObject = function ( type , parent , parent_prop_val 
     }
 
     if ( config_obj ) {
-        config_obj.init.call( obj , this , index );
+        config_obj.init.call( obj , this , index , config_obj );
     }else{
         console.log( "No object type found:" + type );
     }
