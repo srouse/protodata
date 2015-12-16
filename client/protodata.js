@@ -9,6 +9,9 @@ ProtoData.createModel = function( data ) {
 
         if ( typeof obj_info == "string" ) {
             obj = this.lookup[ obj_info ];
+        }else if ( Object.prototype.toString.call( obj_info )
+                        === '[object Array]' ) {
+            return this.getArray( obj_info );
         }else if ( obj_info['guid'] ) {
             obj = this.lookup[ obj_info['guid'] ];
         }
