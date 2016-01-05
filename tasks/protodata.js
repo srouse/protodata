@@ -51,8 +51,13 @@ module.exports = function (grunt) {
             fileSave( path.resolve( dest ) )
                     .write( protoData.serializedData );
 
+            // make this file complete...
+            var client_filename = require.resolve( "../client/protodata.js" );
             fileSave( path.resolve( dest + ".js" ) )
-                    .write( protoData.serialziedJavascript );
+                    .write(
+                        grunt.file.read( client_filename ) + "\n\n\n" +
+                        protoData.serialziedJavascript
+                    );
         }
 
     });
