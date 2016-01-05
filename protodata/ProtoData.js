@@ -157,13 +157,17 @@ ProtoData.prototype.serializeData = function () {
                     }else{
                         // Not an internal object reference...
                         new_obj[prop_name] = prop_val;
-                        new_javascript_lookup += "\t\t\t" + prop_name + " : '" + prop_val.replace( /'/g , "\\'") +"',\n";
+                        new_javascript_lookup += "\t\t\t" + prop_name + " : " + JSON.stringify( prop_val ) + ",\n";
                     }
 
                 // simple String or Number
                 }else{
                     new_obj[prop_name] = prop_val;
-                    new_javascript_lookup += "\t\t\t" + prop_name + " : '" + prop_val.replace( /'/g , "\\'") + "',\n";
+                    if ( typeof prop_val === "string" ) {
+                        new_javascript_lookup += "\t\t\t" + prop_name + " : '" + prop_val.replace( /'/g , "\\'") + "',\n";
+                    }else{
+                        new_javascript_lookup += "\t\t\t" + prop_name + " : " + prop_val + ",\n";
+                    }
                 }
             }
 
