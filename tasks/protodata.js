@@ -16,9 +16,9 @@ module.exports = function (grunt) {
 		    grunt.verbose.warn('Destination not written because no source files were provided.');
 	    }
 
+        // load in databases
         var options = this.options();
         var database;
-
         if ( options.databases ) {
             for ( var database_name in options.databases ) {
                 var database_loc = options.databases[ database_name ];
@@ -33,11 +33,11 @@ module.exports = function (grunt) {
             }
         }
 
+        // process into final files
         var file,data_config,src,src_obj,dest;
 		for ( var f=0; f<this.files.length; f++ ) {
             file = this.files[f];
 
-            //data_config = grunt.file.read( file.src[0] );
             dest = file.dest;
             src = file.src[0];
             if (!grunt.file.exists( src )) {
@@ -50,6 +50,9 @@ module.exports = function (grunt) {
 
             fileSave( path.resolve( dest ) )
                     .write( protoData.serializedData );
+
+            fileSave( path.resolve( dest + ".js" ) )
+                    .write( protoData.serialziedJavascript );
         }
 
     });

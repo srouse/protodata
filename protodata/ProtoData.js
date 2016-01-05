@@ -35,12 +35,17 @@ ProtoData.prototype.random = function (min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-ProtoData.prototype.generateArray = function ( type , total , parent , parent_prop_val ) {
+ProtoData.prototype.generateArray = function (
+    type , total ,
+    parent , parent_prop_val
+) {
     var type_obj = this.config[ type ];
     var data_arr = [],child;
     if ( type_obj ) {
         for ( var i=0; i<total; i++ ) {
-            var child = this.generateObject( type , parent , parent_prop_val , i );
+            var child = this.generateObject(
+                                type , parent , parent_prop_val , i
+                            );
             if ( parent && parent_prop_val ) {
                 child[ parent_prop_val ] = parent;
             }
@@ -52,7 +57,10 @@ ProtoData.prototype.generateArray = function ( type , total , parent , parent_pr
     return data_arr;
 }
 
-ProtoData.prototype.generateObject = function ( type , parent , parent_prop_val , index ) {
+ProtoData.prototype.generateObject = function (
+    type , parent ,
+    parent_prop_val , index
+) {
     if ( !index ) {
         index = 0;
     }
@@ -70,7 +78,7 @@ ProtoData.prototype.generateObject = function ( type , parent , parent_prop_val 
     }
 
     if ( config_obj ) {
-        config_obj.init.call( obj , this , index , config_obj );
+        config_obj.init.call( obj , this , index , config_obj);
     }else{
         console.log( "No object type found:" + type );
     }
@@ -79,59 +87,126 @@ ProtoData.prototype.generateObject = function ( type , parent , parent_prop_val 
 
 ProtoData.prototype.serializeData = function () {
     var objects,obj,prop_val;
-    var new_data = {},new_obj;
 
     var lookup = {};
+    var new_data = {},new_obj;
+
+    var js_lookup = {};
+    var data_name = "__" + Math.round( Math.random() * 1000000 );
+    var new_javascript = "var " + data_name + " = {\n";
+
+    var new_javascript_lookup = "\tlookup : {\n";
+
+    // walk through all objects ( already flat organziation of the data )
     for ( var obj_name in this.data ) {
         new_data[ obj_name ] = [];
+
+        // don't care about any other objects but root
+        // everything can be pulled from root objects...
+        if ( obj_name == "_root" )
+            new_javascript += "\t" + obj_name + " : [\n";
+
         objects = this.data[ obj_name ];
+
+        // walk through all the instances...
         for ( var i=0; i<objects.length; i++ ) {
             obj = objects[i];
+
             new_obj = {};
             new_data[ obj_name ].push( obj.guid );
+
+            if ( obj_name == "_root" )
+                new_javascript += "\t\t'"+ obj.guid +"',\n";
+
+            new_javascript_lookup += "\t\t" + obj.guid + " : {\n";
+
+            // walk through all the properties looking for nested objects
             for ( var prop_name in obj ) {
                 prop_val = obj[prop_name];
-                if ( Object.prototype.toString.call( prop_val ) === '[object Array]' ) {
+
+                // an Array
+                if (    Object.prototype.toString.call( prop_val )
+                        === '[object Array]' ) {
                     var arr_obj;
                     new_obj[prop_name] = [];
+
+                    new_javascript_lookup += "\t\t\t" + prop_name + " : function() { return " + data_name + ".get( [\n";
+                    var new_javascript_lookup_arr = [];
                     for ( var a=0; a<prop_val.length; a++ ) {
                         arr_obj = prop_val[a];
-                        if ( arr_obj.guid ) {
+                        if ( arr_obj && arr_obj.guid ) {
                             new_obj[prop_name].push( {guid:arr_obj.guid} );
+                            new_javascript_lookup_arr.push( "\t\t\t\t\t'" + arr_obj.guid + "'" );
+                        }else{
+                            // empty entries are information
+                            new_obj[prop_name].push( false );
+                            new_javascript_lookup_arr.push( "\t\t\t\t\tfalse" );
                         }
                     }
+                    new_javascript_lookup += new_javascript_lookup_arr.join(",\n") + "\n";
+                    new_javascript_lookup += "\t\t\t\t])},\n";
+
+
+                // an Object
                 }else if ( typeof prop_val === 'object' ) {
                     if ( prop_val.guid ) {
                         new_obj[prop_name] = {guid:prop_val.guid};
+                        new_javascript_lookup += "\t\t\t" + prop_name + " : function() {   return " + data_name + ".get( '" + prop_val.guid + "' )  },\n";
+
                     }else{
                         new_obj[prop_name] = prop_val;
+                        new_javascript_lookup += "\t\t\t" + prop_name + " : '" + prop_val +"',\n";
                     }
+
+                // simple String or Number
                 }else{
                     new_obj[prop_name] = prop_val;
+                    new_javascript_lookup += "\t\t\t" + prop_name + " : '"+ prop_val +"',\n";
                 }
             }
 
             lookup[ obj.guid ] = new_obj;
+            new_javascript_lookup += "\t\t},\n";
+
         }
+        if ( obj_name == "_root" )
+            new_javascript += "\t],\n";
     }
+    new_javascript_lookup += "\t}\n";
+
 
     new_data.lookup = lookup;
     this.serializedJSON = new_data;
     this.serializedData = JSON.stringify( new_data );
+
+    new_javascript += new_javascript_lookup;
+    new_javascript += "\n};";
+    new_javascript += "\nvar protoData = ProtoData.createModel( " + data_name + " )._root;// everything can be pulled from root";
+
+    this.serialziedJavascript = new_javascript;
+
     return this.serializedData;
 }
+
 
 ProtoData.prototype.addDataViaPath = function ( databasePath, name ) {
     //this.db[name] = require(databasePath);
     this.addData( require(databasePath) , name );
 }
+
 ProtoData.prototype.addData = function ( database , name ) {
     this.db[name] = database;
 }
 
 ProtoData.prototype.randomObject = function ( dbName ) {
-    var random_index = Math.round( Math.random() * this.db[dbName].length-1 );
+    var random_index = Math.round( Math.random() * (this.db[dbName].length-1) );
     return this.db[dbName][ random_index ];
+}
+
+ProtoData.prototype.randomFromArray = function ( arr ) {
+    var random_index = Math.random() * (arr.length-1);
+    random_index = Math.round( random_index );
+    return arr[ random_index ];
 }
 
 ProtoData.prototype.db_decorateRandom = function( obj, dbName ) {
