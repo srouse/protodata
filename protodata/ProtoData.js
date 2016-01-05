@@ -127,6 +127,7 @@ ProtoData.prototype.serializeData = function () {
                 // an Array
                 if (    Object.prototype.toString.call( prop_val )
                         === '[object Array]' ) {
+
                     var arr_obj;
                     new_obj[prop_name] = [];
 
@@ -149,19 +150,20 @@ ProtoData.prototype.serializeData = function () {
 
                 // an Object
                 }else if ( typeof prop_val === 'object' ) {
+
                     if ( prop_val.guid ) {
                         new_obj[prop_name] = {guid:prop_val.guid};
                         new_javascript_lookup += "\t\t\t" + prop_name + " : function() {   return " + data_name + ".get( '" + prop_val.guid + "' )  },\n";
-
                     }else{
+                        // Not an internal object reference...
                         new_obj[prop_name] = prop_val;
-                        new_javascript_lookup += "\t\t\t" + prop_name + " : '" + prop_val +"',\n";
+                        new_javascript_lookup += "\t\t\t" + prop_name + " : '" + prop_val.replace( /'/g , "\\'") +"',\n";
                     }
 
                 // simple String or Number
                 }else{
                     new_obj[prop_name] = prop_val;
-                    new_javascript_lookup += "\t\t\t" + prop_name + " : '"+ prop_val +"',\n";
+                    new_javascript_lookup += "\t\t\t" + prop_name + " : '" + prop_val.replace( /'/g , "\\'") + "',\n";
                 }
             }
 

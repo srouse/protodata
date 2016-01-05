@@ -3,16 +3,16 @@
         "name": "Kermit"
     },
     {
-        "name": "Baron Silas Greenback"
+        "name": "Ba'ron Silas Green'back"
     },
     {
-        "name": "Aogaeru"
+        "name": "Aoga'eru"
     },
     {
-        "name": "Besobeso"
+        "name": "Besobe'so"
     },
     {
-        "name": "Demetan"
+        "name": "De'met'an"
     },
     {
         "name": "Ed Bighead"
