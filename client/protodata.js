@@ -41,5 +41,11 @@ ProtoData.createModel = function( data ) {
     }
     data._root = _root;
 
+    // you should be able to walk around with just the _root,
+    // so get lookup is added to it...
+    _root.get = function ( obj_info ) {
+        return data.get( obj_info );
+    }
+
     return data;
 }
