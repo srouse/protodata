@@ -209,10 +209,33 @@ ProtoData.prototype.randomObject = function ( dbName ) {
     return this.db[dbName][ random_index ];
 }
 
-ProtoData.prototype.randomFromArray = function ( arr ) {
-    var random_index = Math.random() * (arr.length-1);
-    random_index = Math.round( random_index );
-    return arr[ random_index ];
+ProtoData.prototype.randomFromArray = function ( arr , total ) {
+
+    var arr_length = arr.length;
+
+    if ( !total ) {
+        var random_index = Math.random() * ( arr_length - 1 );
+        random_index = Math.round( random_index );
+        return arr[ random_index ];
+    }
+
+    if ( total >= arr_length ) {
+        return arr;
+    }
+
+    var new_array = [],random_index,index_lookup = {};
+    while ( new_array.length < total ) {
+        random_index = Math.random() * ( arr_length - 1 );
+        random_index = Math.round( random_index );
+
+        if ( !index_lookup["i_"+random_index] ) {
+            index_lookup["i_"+random_index] = true;
+            new_array.push( arr[ random_index ] );
+        }
+
+    }
+
+    return new_array;
 }
 
 ProtoData.prototype.db_decorateRandom = function( obj, dbName ) {
