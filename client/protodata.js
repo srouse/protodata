@@ -5,16 +5,37 @@ var ProtoData = function () {}
 ProtoData.createModel = function( data ) {
 
     data.get = function ( obj_info ) {
-        var obj;
+        var obj,lookup_obj,guid;
 
         if ( typeof obj_info == "string" ) {
-            obj = this.lookup[ obj_info ];
+            guid = obj_info;
         }else if (
             Object.prototype.toString.call( obj_info ) === '[object Array]'
         ) {
             return this.getArray( obj_info );
         }else if ( obj_info && obj_info['guid'] ) {
-            obj = this.lookup[ obj_info['guid'] ];
+            guid = obj_info['guid'];
+        }
+
+        lookup_obj = this.lookup[ guid ];
+
+        if ( !lookup_obj ) {
+            //lets create a random one!
+            var guid_arr = guid.split("_");
+            var lookup_arr = this.obj_lookup[ guid_arr[0] ];
+            var arr_length = lookup_arr.length;
+            var random_index = Math.round( Math.random() * ( arr_length - 1 ) );
+
+            var lookup_obj = this.lookup[ lookup_arr[random_index] ];
+
+            obj = new lookup_obj();
+            obj.guid = guid;
+
+            this.lookup[ guid ] = function () {};
+            this.lookup[ guid ].prototype = obj;
+
+        }else{
+            obj = new lookup_obj();
         }
 
         if ( obj ) {
