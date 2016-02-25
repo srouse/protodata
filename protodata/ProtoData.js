@@ -109,7 +109,7 @@ ProtoData.prototype.serializeData = function () {
 
     //var new_javascript_lookup = "\tlookup : {\n";
     var new_javascript_lookup = "\tthis.lookup = {};\n";
-    new_javascript_lookup += "\tthis.obj_lookup = {};\n\n";
+    //new_javascript_lookup += "\tthis.obj_lookup = {};\n\n";
 
     // walk through all objects ( already flat organziation of the data )
     for ( var obj_name in this.data ) {
@@ -137,13 +137,13 @@ ProtoData.prototype.serializeData = function () {
             }
 
             //new_javascript_lookup += "\t\t" + obj.guid + " : {\n";
-            new_javascript_lookup += "\tthis.lookup['" + obj.guid + "'] = function () {};\n";
-
-            guid_arr = obj.guid.split("_");
-            new_javascript_lookup += "\tthis.obj_lookup['"+guid_arr[0]+"'] = this.obj_lookup['"+guid_arr[0]+"'] || [];\n";
-            new_javascript_lookup += "\tthis.obj_lookup['"+guid_arr[0]+"'].push( '" + obj.guid + "' );\n";
             //new_javascript_lookup += "\tthis.lookup['" + obj.guid + "'] = function () {};\n";
-            new_javascript_lookup += "\tthis.lookup['" + obj.guid + "'].prototype = {\n";
+
+            //guid_arr = obj.guid.split("_");
+            //new_javascript_lookup += "\tthis.obj_lookup['"+guid_arr[0]+"'] = this.obj_lookup['"+guid_arr[0]+"'] || [];\n";
+            //new_javascript_lookup += "\tthis.obj_lookup['"+guid_arr[0]+"'].push( '" + obj.guid + "' );\n";
+            //new_javascript_lookup += "\tthis.lookup['" + obj.guid + "'] = function () {};\n";
+            new_javascript_lookup += "\tthis.lookup['" + obj.guid + "'] = {\n";
 
             // walk through all the properties looking for nested objects
             for ( var prop_name in obj ) {
@@ -178,8 +178,8 @@ ProtoData.prototype.serializeData = function () {
                     //new_javascript_lookup += "\t\t\t\t])},\n";
 
                     new_javascript_lookup += "\t\t_" + prop_name + ":[" + new_javascript_lookup_arr.join(",") + "],\n";
-                    new_javascript_lookup += "\t\tset " + prop_name + "( val ) {   this._" + prop_name + " = val;  },\n";
-                    new_javascript_lookup += "\t\tget " + prop_name + "() {   return " + data_name + ".get( this._" + prop_name + " );  },\n";
+                    new_javascript_lookup += "\t\tset " + prop_name + "( val ) {   delete this." + prop_name + "; this." + prop_name + " = val;  },\n";
+                    new_javascript_lookup += "\t\tget " + prop_name + "() {   delete this." + prop_name + "; this." + prop_name + " = " + data_name + ".get( this._" + prop_name + " ); return this." + prop_name + ";  },\n";
 
 
                 // an Object
@@ -189,8 +189,11 @@ ProtoData.prototype.serializeData = function () {
                         new_obj[prop_name] = {guid:prop_val.guid};
                         //new_javascript_lookup += "\t\t\t" + prop_name + " : function() {   return " + data_name + ".get( '" + prop_val.guid + "' );//test  },\n";
                         new_javascript_lookup += "\t\t_" + prop_name + ":'" + prop_val.guid + "',\n";
-                        new_javascript_lookup += "\t\tset " + prop_name + "( val ) {   this._" + prop_name + " = val;  },\n";
-                        new_javascript_lookup += "\t\tget " + prop_name + "() {   return " + data_name + ".get( this._" + prop_name + " );  },\n";
+                        //new_javascript_lookup += "\t\tset " + prop_name + "( val ) {   this._" + prop_name + " = val;  },\n";
+                        //new_javascript_lookup += "\t\tget " + prop_name + "() {   return " + data_name + ".get( this._" + prop_name + " );  },\n";
+                        new_javascript_lookup += "\t\tset " + prop_name + "( val ) {   delete this." + prop_name + "; this." + prop_name + " = val;  },\n";
+                        new_javascript_lookup += "\t\tget " + prop_name + "() {   delete this." + prop_name + "; this." + prop_name + " = " + data_name + ".get( this._" + prop_name + " ); return this." + prop_name + ";  },\n";
+
                     }else{
                         // Not an internal object reference...
                         new_obj[prop_name] = prop_val;

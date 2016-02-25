@@ -20,6 +20,8 @@ ProtoData.createModel = function( data ) {
         lookup_obj = this.lookup[ guid ];
 
         if ( !lookup_obj ) {
+            console.log( "COULDN'T FIND:" + guid );
+            /*
             //lets create a random one!
             var guid_arr = guid.split("_");
             var lookup_arr = this.obj_lookup[ guid_arr[0] ];
@@ -33,9 +35,10 @@ ProtoData.createModel = function( data ) {
 
             this.lookup[ guid ] = function () {};
             this.lookup[ guid ].prototype = obj;
+            */
 
         }else{
-            obj = new lookup_obj();
+            obj = lookup_obj;//new lookup_obj();
         }
 
         if ( obj ) {

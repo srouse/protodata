@@ -21,7 +21,7 @@ module.exports = {
     },
     organization:{
         init:function ( pd ) {
-            this.title = pd.db_random( "firstName" ) + " " + pd.db_random( "lastName" );
+            this.title = pd.db_random( "firstName" ) + pd.db_random( "lastName" );
             this.address = pd.db_random( "address" );
         },
         root:true
