@@ -4,6 +4,8 @@ var ProtoData = function () {
     this.last_id = 0;
     this.db = {};
 
+    this.db_indexes = {};
+
     // Add Databases
     this.addDataViaPath("../databases/firstNames.js", "firstName");
     this.addDataViaPath("../databases/lastNames.js", "lastName");
@@ -72,7 +74,7 @@ ProtoData.prototype.generateObject = function (
 
         obj = {};
         this.last_id++;
-        obj.guid = type + "_" + this.last_id;//this.data[ type ].length;
+        obj.guid = type + "_" + this.data[ type ].length;
 
         if (
             !config_obj.max ||
@@ -104,12 +106,8 @@ ProtoData.prototype.serializeData = function () {
 
     var js_lookup = {};
     var data_name = "__" + Math.round( Math.random() * 1000000 );
-    //var new_javascript = "var " + data_name + " = {\n";
     var new_javascript = "var " + data_name + " = function () {\n";
-
-    //var new_javascript_lookup = "\tlookup : {\n";
     var new_javascript_lookup = "\tthis.lookup = {};\n";
-    //new_javascript_lookup += "\tthis.obj_lookup = {};\n\n";
 
     // walk through all objects ( already flat organziation of the data )
     for ( var obj_name in this.data ) {
@@ -119,7 +117,6 @@ ProtoData.prototype.serializeData = function () {
         // everything can be pulled from root objects...
         if ( obj_name == "_root" ) {
             new_javascript += "\tthis." + obj_name + " = [\n";
-            //new_javascript += "\tthis." + obj_name + " = [];\n";
         }
 
         objects = this.data[ obj_name ];
@@ -133,16 +130,8 @@ ProtoData.prototype.serializeData = function () {
 
             if ( obj_name == "_root" ) {
                 new_javascript += "\t\t'"+ obj.guid +"',\n";
-                //new_javascript += "\tthis." + obj_name + ".push( '"+ obj.guid +"' );\n\n";
             }
 
-            //new_javascript_lookup += "\t\t" + obj.guid + " : {\n";
-            //new_javascript_lookup += "\tthis.lookup['" + obj.guid + "'] = function () {};\n";
-
-            //guid_arr = obj.guid.split("_");
-            //new_javascript_lookup += "\tthis.obj_lookup['"+guid_arr[0]+"'] = this.obj_lookup['"+guid_arr[0]+"'] || [];\n";
-            //new_javascript_lookup += "\tthis.obj_lookup['"+guid_arr[0]+"'].push( '" + obj.guid + "' );\n";
-            //new_javascript_lookup += "\tthis.lookup['" + obj.guid + "'] = function () {};\n";
             new_javascript_lookup += "\tthis.lookup['" + obj.guid + "'] = {\n";
 
             // walk through all the properties looking for nested objects
@@ -156,7 +145,6 @@ ProtoData.prototype.serializeData = function () {
                     var arr_obj;
                     new_obj[prop_name] = [];
 
-                    //new_javascript_lookup += "\t\t\t" + prop_name + " : function() { return " + data_name + ".get( [\n";
                     var new_javascript_lookup_arr = [];
                     for ( var a=0; a<prop_val.length; a++ ) {
                         arr_obj = prop_val[a];
@@ -169,28 +157,16 @@ ProtoData.prototype.serializeData = function () {
                             new_javascript_lookup_arr.push( "false" );
                         }
                     }
-                    //new_javascript_lookup += new_javascript_lookup_arr.join(",\n") + "\n";
-
-                    //new_javascript_lookup += "\t\t\t_" + prop_name + ":[" + new_javascript_lookup_arr.join(",") + "],\n";
-                    //new_javascript_lookup += "\t\t\tset " + prop_name + "( val ) {   this._" + prop_name + " = val;  },\n";
-                    //new_javascript_lookup += "\t\t\tget " + prop_name + "() {   return " + data_name + ".get( this._" + prop_name + " );  },\n";
-
-                    //new_javascript_lookup += "\t\t\t\t])},\n";
-
                     new_javascript_lookup += "\t\t_" + prop_name + ":[" + new_javascript_lookup_arr.join(",") + "],\n";
                     new_javascript_lookup += "\t\tset " + prop_name + "( val ) {   delete this." + prop_name + "; this." + prop_name + " = val;  },\n";
                     new_javascript_lookup += "\t\tget " + prop_name + "() {   delete this." + prop_name + "; this." + prop_name + " = " + data_name + ".get( this._" + prop_name + " ); return this." + prop_name + ";  },\n";
-
 
                 // an Object
                 }else if ( typeof prop_val === 'object' ) {
 
                     if ( prop_val.guid ) {
                         new_obj[prop_name] = {guid:prop_val.guid};
-                        //new_javascript_lookup += "\t\t\t" + prop_name + " : function() {   return " + data_name + ".get( '" + prop_val.guid + "' );//test  },\n";
                         new_javascript_lookup += "\t\t_" + prop_name + ":'" + prop_val.guid + "',\n";
-                        //new_javascript_lookup += "\t\tset " + prop_name + "( val ) {   this._" + prop_name + " = val;  },\n";
-                        //new_javascript_lookup += "\t\tget " + prop_name + "() {   return " + data_name + ".get( this._" + prop_name + " );  },\n";
                         new_javascript_lookup += "\t\tset " + prop_name + "( val ) {   delete this." + prop_name + "; this." + prop_name + " = val;  },\n";
                         new_javascript_lookup += "\t\tget " + prop_name + "() {   delete this." + prop_name + "; this." + prop_name + " = " + data_name + ".get( this._" + prop_name + " ); return this." + prop_name + ";  },\n";
 
@@ -230,7 +206,6 @@ ProtoData.prototype.serializeData = function () {
     new_javascript += new_javascript_lookup;
     new_javascript += "\n};";
 
-    //new_javascript += "v( " + data_name + " );";
     new_javascript += "var " + data_name + " = new " + data_name + "();";
     new_javascript += "\nvar protoData = ProtoData.createModel( " + data_name + " )._root;// everything can be pulled from root";
 
@@ -249,9 +224,32 @@ ProtoData.prototype.addData = function ( database , name ) {
     this.db[name] = database;
 }
 
+
+
+//========================
+// RANDOMNESS
+//========================
+
 ProtoData.prototype.randomObject = function ( dbName ) {
     var random_index = Math.round( Math.random() * (this.db[dbName].length-1) );
     return this.db[dbName][ random_index ];
+}
+ProtoData.prototype.incrementalObject = function ( dbName , localized_index_str ) {
+    var index_str = dbName;
+    if ( localized_index_str )
+        index_str = dbName + "_|||||_" + localized_index_str;//it's global otherwise
+
+    if ( !this.db_indexes[index_str] ) {
+        this.db_indexes[index_str] = 0;
+    }
+    var object = this.db[dbName][ this.db_indexes[index_str] ];
+
+    this.db_indexes[index_str]++;
+
+    if ( this.db_indexes[index_str] > this.db[dbName].length-1 ) {
+        this.db_indexes[index_str] = 0;
+    }
+    return object;
 }
 
 ProtoData.prototype.randomFromArray = function ( arr , total ) {
@@ -291,9 +289,24 @@ ProtoData.prototype.db_decorateRandom = function( obj, dbName ) {
     }
 }
 
+ProtoData.prototype.db_decorateIncremental = function( obj, dbName , localized_index_str) {
+    var val = this.incrementalObject( dbName , localized_index_str );
+    for(var key in val)
+    {
+        obj[key] = val[key];
+    }
+}
+
 ProtoData.prototype.db_random = function( dbName ) {
     return this.randomObject( dbName );
 }
+
+ProtoData.prototype.db_incremental = function( dbName , localized_index_str ) {
+    return this.incrementalObject( dbName , localized_index_str );
+}
+
+
+
 
 var module = module || {};
 module.exports = ProtoData;

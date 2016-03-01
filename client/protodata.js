@@ -7,6 +7,11 @@ ProtoData.createModel = function( data ) {
     data.get = function ( obj_info ) {
         var obj,lookup_obj,guid;
 
+        // could be false (used in arrays for empty entry...)
+        if ( !obj_info ) {
+            return false;
+        }
+
         if ( typeof obj_info == "string" ) {
             guid = obj_info;
         }else if (
