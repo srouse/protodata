@@ -10,10 +10,10 @@ module.exports = {
                                     );
 
             this.frog_arr = pd.generateArray(
-                                        "frog_obj" ,  2,
+                                    "frog_obj" ,  2,
                                         this , "frog"
                                     );
-            this.frog_obj = pd.generateObject( "frog_obj" );
+            this.frog_obj = pd.generateObject( "frog_obj" , this , "pooba" );
 
 
             this.frog_arr_incremental = pd.generateArray(

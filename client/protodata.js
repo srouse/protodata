@@ -26,21 +26,41 @@ ProtoData.createModel = function( data ) {
 
         if ( !lookup_obj ) {
             console.log( "COULDN'T FIND:" + guid );
-            /*
-            //lets create a random one!
+
+            //lets create an empty one!!!
             var guid_arr = guid.split("_");
-            var lookup_arr = this.obj_lookup[ guid_arr[0] ];
-            var arr_length = lookup_arr.length;
-            var random_index = Math.round( Math.random() * ( arr_length - 1 ) );
+            var guid_index = guid_arr[ guid_arr.length-1 ];
+            guid_arr.pop();
+            var guid_type = guid_arr.join("_");
 
-            var lookup_obj = this.lookup[ lookup_arr[random_index] ];
+            // just take the first one...
+            var ref_obj = this.lookup[ guid_type + "_0" ];
+            if (!ref_obj) {
+                console.log( "COULDN'T FIND it again:" + guid );
+                return false;
+            }
 
-            obj = new lookup_obj();
-            obj.guid = guid;
+            var new_obj = {};
+            this.lookup[ guid ] = new_obj;
 
-            this.lookup[ guid ] = function () {};
-            this.lookup[ guid ].prototype = obj;
-            */
+            for ( var name in ref_obj ) {
+                if ( Object.prototype.toString.call( ref_obj[name] ) === '[object Array]' ) {
+                    new_obj[ name ] = [];
+                }else if ( Object.prototype.toString.call( ref_obj[name] ) === '[object Object]' ) {
+                    var obj_guid = ref_obj[name].guid;
+                    var obj_guid_arr = obj_guid.split("_");
+                    obj_guid_arr.pop();
+                    obj_guid = obj_guid_arr.join("_");
+                    console.log( obj_guid + "_" + guid_index );
+                    new_obj[ name ] = this.get( obj_guid + "_" + guid_index );
+                }else{
+                    new_obj[ name ] = "";
+                }
+            }
+            new_obj.guid = guid;
+
+            obj = new_obj;
+
 
         }else{
             obj = lookup_obj;//new lookup_obj();
