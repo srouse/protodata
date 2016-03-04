@@ -146,20 +146,35 @@ ProtoData.prototype.serializeData = function () {
                     new_obj[prop_name] = [];
 
                     var new_javascript_lookup_arr = [];
+                    var guid_objs = 0, base_objs = 0;
                     for ( var a=0; a<prop_val.length; a++ ) {
                         arr_obj = prop_val[a];
                         if ( arr_obj && arr_obj.guid ) {
                             new_obj[prop_name].push( {guid:arr_obj.guid} );
                             new_javascript_lookup_arr.push( "'" + arr_obj.guid + "'" );
+                            guid_objs++;
                         }else{
                             // empty entries are information
-                            new_obj[prop_name].push( false );
-                            new_javascript_lookup_arr.push( "false" );
+                            //new_obj[prop_name].push( false );
+                            //new_javascript_lookup_arr.push( "false" );
+
+                            if ( typeof arr_obj === "string" ) {
+                                new_obj[prop_name].push( "'" + arr_obj + "'" );
+                                new_javascript_lookup_arr.push( "'" + arr_obj + "'" );
+                            }else{
+                                new_obj[prop_name].push( arr_obj );
+                                new_javascript_lookup_arr.push( arr_obj );
+                            }
+                            base_objs++;
                         }
                     }
-                    new_javascript_lookup += "\t\t_" + prop_name + ":[" + new_javascript_lookup_arr.join(",") + "],\n";
-                    new_javascript_lookup += "\t\tset " + prop_name + "( val ) {   delete this." + prop_name + "; this." + prop_name + " = val;  },\n";
-                    new_javascript_lookup += "\t\tget " + prop_name + "() {   delete this." + prop_name + "; this." + prop_name + " = " + data_name + ".get( this._" + prop_name + " ); return this." + prop_name + ";  },\n";
+                    if ( guid_objs > 0 ) {
+                        new_javascript_lookup += "\t\t_" + prop_name + ":[" + new_javascript_lookup_arr.join(",") + "],\n";
+                        new_javascript_lookup += "\t\tset " + prop_name + "( val ) {   delete this." + prop_name + "; this." + prop_name + " = val;  },\n";
+                        new_javascript_lookup += "\t\tget " + prop_name + "() {   delete this." + prop_name + "; this." + prop_name + " = " + data_name + ".get( this._" + prop_name + " ); return this." + prop_name + ";  },\n";
+                    }else{
+                        new_javascript_lookup += "\t\t" + prop_name + ":[" + new_javascript_lookup_arr.join(",") + "],\n";
+                    }
 
                 // an Object
                 }else if ( typeof prop_val === 'object' ) {

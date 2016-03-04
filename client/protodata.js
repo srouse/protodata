@@ -25,7 +25,7 @@ ProtoData.createModel = function( data ) {
         lookup_obj = this.lookup[ guid ];
 
         if ( !lookup_obj ) {
-            console.log( "COULDN'T FIND:" + guid );
+            // console.log( "COULDN'T FIND:" + guid );
 
             //lets create an empty one!!!
             var guid_arr = guid.split("_");
@@ -36,8 +36,8 @@ ProtoData.createModel = function( data ) {
             // just take the first one...
             var ref_obj = this.lookup[ guid_type + "_0" ];
             if (!ref_obj) {
-                console.log( "COULDN'T FIND it again:" + guid );
-                return false;
+                // console.log( "COULDN'T FIND it again:" + guid );
+                return obj_info;// just reflect it back...;
             }
 
             var new_obj = {};
@@ -47,12 +47,20 @@ ProtoData.createModel = function( data ) {
                 if ( Object.prototype.toString.call( ref_obj[name] ) === '[object Array]' ) {
                     new_obj[ name ] = [];
                 }else if ( Object.prototype.toString.call( ref_obj[name] ) === '[object Object]' ) {
-                    var obj_guid = ref_obj[name].guid;
-                    var obj_guid_arr = obj_guid.split("_");
-                    obj_guid_arr.pop();
-                    obj_guid = obj_guid_arr.join("_");
-                    console.log( obj_guid + "_" + guid_index );
-                    new_obj[ name ] = this.get( obj_guid + "_" + guid_index );
+                    if ( ref_obj[name].guid ) {
+                        var obj_guid = ref_obj[name].guid;
+                        var obj_guid_arr = obj_guid.split("_");
+                        obj_guid_arr.pop();
+                        obj_guid = obj_guid_arr.join("_");
+                        new_obj[ name ] = this.get( obj_guid + "_" + guid_index );
+                    }else{
+                        var sub_obj = ref_obj[name];
+                        var new_sub_obj = {};
+                        for ( var sub_name in sub_obj ) {
+                            new_sub_obj[sub_name] = "";
+                        }
+                        new_obj[ name ] = new_sub_obj;
+                    }
                 }else{
                     new_obj[ name ] = "";
                 }
