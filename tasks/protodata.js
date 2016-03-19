@@ -2,7 +2,6 @@
 
 var async = require('async');
 var path = require("path");
-var fileSave = require('file-save');
 
 var ProtoData = require("../protodata/ProtoData");
 var protoData = new ProtoData();
@@ -10,7 +9,8 @@ var protoData = new ProtoData();
 module.exports = function (grunt) {
 
     grunt.registerMultiTask('protodata', 'generate random data fast', function () {
-		var done = this.async();
+
+        var done = this.async();
 
 		if ( this.files.length < 1 ) {
 		    grunt.verbose.warn('Destination not written because no source files were provided.');
@@ -33,10 +33,18 @@ module.exports = function (grunt) {
             }
         }
 
-        // process into final files
         var file,data_config,src,src_obj,dest;
-		for ( var f=0; f<this.files.length; f++ ) {
-            file = this.files[f];
+
+        var files = this.files.slice();
+
+        function process() {
+
+            if( files.length <= 0 ) {
+                done();
+                return;
+            }
+
+            var file = files.pop();
 
             dest = file.dest;
             src = file.src[0];
@@ -48,17 +56,24 @@ module.exports = function (grunt) {
             src_obj = require( path.resolve( src ) );
             protoData.generateData( src_obj );
 
-            fileSave( path.resolve( dest ) )
-                    .write( protoData.serializedData );
+            grunt.file.write(
+                path.resolve( dest ),
+                protoData.serializedData
+            );
 
             // make this file complete...
             var client_filename = require.resolve( "../client/protodata.js" );
-            fileSave( path.resolve( dest + ".js" ) )
-                    .write(
-                        grunt.file.read( client_filename ) + "\n\n\n" +
-                        protoData.serialziedJavascript
-                    );
+
+            grunt.file.write(
+                path.resolve( dest + ".js" ),
+                grunt.file.read( client_filename ) + "\n\n\n" +
+                protoData.serialziedJavascript
+            );
+
+            process();
         }
+
+        process();
 
     });
 
