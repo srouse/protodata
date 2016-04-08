@@ -13,16 +13,19 @@ var ProtoData = function () {
     this.addDataViaPath("../databases/nouns.js", "noun");
 };
 
+
 ProtoData.prototype.generateData = function ( config , arguments ) {
     this.config = config;
-    this.data = {"_root":{}};
+    this.data = {"_root":[]};
+
+    this.root = {};
 
     var obj,config_obj,_root=[];
     for ( var obj_name in config ) {
         config_obj = config[obj_name];
 
         if ( config_obj.root === true ) {
-            obj = this.generateObject( obj_name );
+            obj = this.generateObject( obj_name , false, false, 0, false, this.root , obj_name );
             _root.push( obj );
         }
     }
@@ -61,7 +64,10 @@ ProtoData.prototype.generateArray = function (
 
 ProtoData.prototype.generateObject = function (
     type , parent ,
-    parent_prop_val , index
+    parent_prop_val , index,
+    args,
+    quick_attach_parent,
+    quick_attach_parent_name
 ) {
     if ( !index ) {
         index = 0;
@@ -87,7 +93,11 @@ ProtoData.prototype.generateObject = function (
                 obj[ parent_prop_val ] = parent;
             }
 
-            config_obj.init.call( obj , this , index , config_obj );
+            if ( quick_attach_parent && quick_attach_parent_name ) {
+                quick_attach_parent[quick_attach_parent_name] = obj;
+            }
+
+            config_obj.init.call( obj , this , index , config_obj, args );
         }
 
         return obj;
