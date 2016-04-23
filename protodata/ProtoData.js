@@ -42,14 +42,15 @@ ProtoData.prototype.random = function (min, max) {
 
 ProtoData.prototype.generateArray = function (
     type , total ,
-    parent , parent_prop_val
+    parent , parent_prop_val,
+    args
 ) {
     var type_obj = this.config[ type ];
     var data_arr = [],child;
     if ( type_obj ) {
         for ( var i=0; i<total; i++ ) {
             var child = this.generateObject(
-                                type , parent , parent_prop_val , i
+                                type , parent , parent_prop_val , i, args
                             );
             if ( parent && parent_prop_val ) {
                 child[ parent_prop_val ] = parent;
