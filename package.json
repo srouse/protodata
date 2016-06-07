@@ -2,7 +2,7 @@
 	"name": "protodata",
 	"description": "Generates complex random data for prototyping.",
 	"author": "srouse",
-	"version": "0.2.14",
+	"version": "0.2.15",
 	"dependencies": {
 	    "async": "^0.9.0",
 		"file-save":"~0.2"

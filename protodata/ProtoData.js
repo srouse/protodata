@@ -278,6 +278,58 @@ ProtoData.prototype.incrementalObject = function ( dbName , localized_index_str 
     return object;
 }
 
+ProtoData.prototype.derandomFromArray = function ( arr , derandomization, total ) {
+    if ( derandomization ) {
+        var arr_length = arr.length;
+        //console.log("--------------");
+        //console.log( arr );
+        //console.log( derandomization );
+        var sum = derandomization.reduce(function(a, b) { return a + b; }, 0);
+        var increment = arr_length / sum;
+        var step = arr_length / derandomization.length;
+        //console.log( derandomization.length, sum , increment, step, arr_length );
+        var derandom_number = Math.round( Math.random() * sum );
+        var derand_item;
+
+        var floor = 0,ceil,got_it = false;
+        var derand_floor = 0, derand_ceil = 0;
+        for ( var i=0; i<derandomization.length; i++ ) {
+            derand_item = derandomization[i];
+
+            ceil = Math.min( arr_length-1 , floor+step );
+            derand_ceil = derand_floor + derand_item;
+            if (
+                derandom_number >= derand_floor &&
+                derandom_number <= derand_ceil
+                //derandom_number == i
+            ){
+                //console.log( "This is it!" );
+                //console.log( arr_length, floor, ceil, derandom_number, sum );
+                arr =   arr.slice(
+                            Math.round( floor ) ,
+                            Math.max( Math.round( floor )+1 , Math.round( ceil ) )
+                        );
+                got_it = true;
+                break;
+            }else{
+                //console.log( arr_length, floor, ceil, derandom_number, sum );
+            }
+
+            floor = ceil;
+            derand_floor += derand_item;
+        }
+
+        if ( !got_it ) {
+            console.log( "missed it!" );
+            console.log( derandomization.length, sum , increment, step, arr_length );
+            console.log( arr_length, floor, ceil, derandom_number, sum );
+        }
+        //console.log( arr );
+    }
+
+    return this.randomFromArray( arr, total );
+}
+
 ProtoData.prototype.randomFromArray = function ( arr , total ) {
 
     var arr_length = arr.length;
