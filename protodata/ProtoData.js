@@ -172,6 +172,9 @@ ProtoData.prototype.serializeData = function () {
                             if ( typeof arr_obj === "string" ) {
                                 new_obj[prop_name].push( "'" + arr_obj + "'" );
                                 new_javascript_lookup_arr.push( "'" + arr_obj + "'" );
+                            }else if ( typeof arr_obj === "object" ) {
+                                new_obj[prop_name].push( JSON.stringify( arr_obj ) );
+                                new_javascript_lookup_arr.push( JSON.stringify( arr_obj ) );
                             }else{
                                 new_obj[prop_name].push( arr_obj );
                                 new_javascript_lookup_arr.push( arr_obj );
