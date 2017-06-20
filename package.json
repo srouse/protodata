@@ -1,6 +1,6 @@
 {
   "name": "protodata",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Generates complex random data for prototyping.",
   "homepage": "",
   "author": {
@@ -8,7 +8,9 @@
   },
   "files": [
     "lib",
-    "tasks"
+    "tasks",
+    "databases",
+    "example"
   ],
   "main": "lib/index.js",
   "keywords": [
