@@ -1,80 +1,79 @@
 'use strict';
 
 var async = require('async');
-var path = require("path");
+var path = require('path');
 
-var ProtoData = require("../protodata/ProtoData");
+var ProtoData = require('../lib/ProtoData');
 var protoData = new ProtoData();
 
 module.exports = function (grunt) {
+  grunt.registerMultiTask('protodata', 'generate random data fast', function () {
+    var done = this.async();
 
-    grunt.registerMultiTask('protodata', 'generate random data fast', function () {
+    if (this.files.length < 1) {
+      grunt.verbose.warn('Destination not written because no source files were provided.');
+    }
 
-        var done = this.async();
+    // Load in databases
+    var options = this.options();
+    var database;
+    if (options.databases) {
+      for (var databaseName in options.databases) {
+        var databaseLoc = options.databases[databaseName];
 
-		if ( this.files.length < 1 ) {
-		    grunt.verbose.warn('Destination not written because no source files were provided.');
-	    }
-
-        // load in databases
-        var options = this.options();
-        var database;
-        if ( options.databases ) {
-            for ( var database_name in options.databases ) {
-                var database_loc = options.databases[ database_name ];
-
-                if (!grunt.file.exists( database_loc )) {
-                      grunt.log.warn('Source file "' + database_loc + '" not found.');
-                      return false;
-                }
-
-                database = JSON.parse( grunt.file.read( database_loc ) );
-                protoData.addData( database , database_name );
-            }
+        if (!grunt.file.exists(databaseLoc)) {
+          grunt.log.warn('Source file "' + databaseLoc + '" not found.');
+          return false;
         }
 
-        var file,data_config,src,src_obj,dest;
+        database = JSON.parse(grunt.file.read(databaseLoc));
+        protoData.addData(database, databaseName);
+      }
+    }
 
-        var files = this.files.slice();
+    var file;
+    var dataConfig;
+    var src;
+    var srcObj;
+    var dest;
 
-        function process() {
+    var files = this.files.slice();
 
-            if( files.length <= 0 ) {
-                done();
-                return;
-            }
+    function process() {
+      if (files.length <= 0) {
+        done();
+        return;
+      }
 
-            var file = files.pop();
+      var file = files.pop();
 
-            dest = file.dest;
-            src = file.src[0];
-            if (!grunt.file.exists( src )) {
-                  grunt.log.warn('Source file "' + src + '" not found.');
-                  return false;
-            }
+      dest = file.dest;
+      src = file.src[0];
+      if (!grunt.file.exists(src)) {
+        grunt.log.warn('Source file "' + src + '" not found.');
+        return false;
+      }
 
-            src_obj = require( path.resolve( src ) );
-            protoData.generateData( src_obj );
+      srcObj = require(path.resolve(src));
+      protoData.generateData(srcObj);
 
-            grunt.file.write(
-                path.resolve( dest ),
+      grunt.file.write(
+                path.resolve(dest),
                 protoData.serializedData
             );
 
-            // make this file complete...
-            var client_filename = require.resolve( "../client/protodata.js" );
+            // Make this file complete...
+      var clientFilename = require.resolve('../lib/client.js');
 
-            grunt.file.write(
-                path.resolve( dest + ".js" ),
-                grunt.file.read( client_filename ) + "\n\n\n" +
+      grunt.file.write(
+                path.resolve(dest + '.js'),
+                grunt.file.read(clientFilename) + '\n\n\n' +
                 protoData.serialziedJavascript
             );
 
-            process();
-        }
+      process();
+    }
 
-        process();
-
-    });
-
-}
+    process();
+  });
+};
