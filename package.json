@@ -1,26 +1,48 @@
 {
-	"name": "protodata",
-	"description": "Generates complex random data for prototyping.",
-	"author": "srouse",
-	"version": "0.2.16",
-	"dependencies": {
-	    "async": "^0.9.0",
-		"file-save":"~0.2"
+  "name": "protodata",
+  "version": "0.3.0",
+  "description": "Generates complex random data for prototyping.",
+  "homepage": "",
+  "author": {
+    "name": "srouse"
+  },
+  "files": [
+    "lib"
+  ],
+  "main": "lib/index.js",
+  "keywords": [
+    ""
+  ],
+  "dependencies": {
+		"async": "^2.4.1",
+		"file-save": "~0.2"
 	},
-	"devDependencies": {
-	    "grunt": "^0.4.5"
-	},
-	"main": "protodata/ProtoData.js",
-	"scripts": {
-	    "test": "echo \"Error: no test specified\" && exit 1"
-	},
-	"repository": {
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "nsp": "^2.6.3",
+    "eslint": "^3.18.0",
+    "eslint-config-xo-space": "^0.16.0",
+    "jest": "^19.0.2",
+    "jest-cli": "^20.0.0"
+  },
+  "scripts": {
+    "prepublish": "nsp check",
+    "pretest": "eslint . --fix",
+    "test": "jest"
+  },
+  "eslintConfig": {
+    "extends": "xo-space",
+    "env": {
+      "jest": true,
+      "node": true
+    }
+  },
+  "repository": {
 		"type": "git",
 		"url": "https://srouse@github.com/srouse/protodata.git"
 	},
-	"license": "ISC",
-	"bugs": {
-		"url": "https://catapult.studio/bugs"
-	},
-	"homepage": "https://catapult.studio"
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "license": "ISC"
 }
